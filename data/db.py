@@ -5,8 +5,8 @@ from sqlalchemy.orm import  DeclarativeBase
 import json
 class Base(DeclarativeBase):
     pass
-from sqlalchemy import create_engine, text, Column, Integer, String, Select, select, insert
-engine = create_engine('mysql://<user>:<pass>@localhost/parkinglot', echo=True)
+from sqlalchemy import create_engine, text, Column, Integer, String, Select, select, insert, update
+engine = create_engine('mysql://root:$Shani0589$@localhost/parkinglot', echo=True)
 connection = engine.connect()
 
 
@@ -50,9 +50,18 @@ def get_parking_location_by_id(number):
     result = connection.execute(stmt)
     result = generate_json_response(ParkingLocation, result)
     return result
-def insert_parking_location(data):
-    
+def insert_parking_location(data): 
     stmt = insert(ParkingLocation).values(id = data['id'],parking_locationname=data['parking_locationname'], parking_locationtype=data['parking_locationtype'], parking_locationaddress=data['parking_locationaddress'], parking_id=data['parking_id'])
+    connection.execute(stmt)
+    connection.commit()
+    return get_parking_location()
+def update_parking_location_table(data):
+    stmt = update(ParkingLocation).where(ParkingLocation.id == data['id']).values(parking_locationname=data['parking_locationname'], parking_locationtype=data['parking_locationtype'], parking_locationaddress=data['parking_locationaddress'], parking_id=data['parking_id'])
+    connection.execute(stmt)
+    connection.commit()
+    return get_parking_location()
+def delete_parking_location_record(number):
+    stmt = ParkingLocation.__table__.delete().where(ParkingLocation.id == number)
     connection.execute(stmt)
     connection.commit()
     return get_parking_location()
