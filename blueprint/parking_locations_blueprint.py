@@ -1,8 +1,9 @@
-from flask import request
+from flask import request, jsonify
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from queryparams_schema.query_params_schema import QueryParamsSchema
 from queryparams_schema.request_schema import RequestSchema
+from response_schema.paraking_locations_response_schema import ParkingLocationResponseSchema
 from data.db import (
     get_parking_location,
     get_parking_location_by_id,
@@ -18,6 +19,7 @@ parking_locations_blueprint = Blueprint(
 @parking_locations_blueprint.route('/parkinglocations/')
 class ParkingLocationsAPI(MethodView):
     @parking_locations_blueprint.arguments(QueryParamsSchema, location='query')
+    @parking_locations_blueprint.response(200, ParkingLocationResponseSchema(many=True))
     def get(self, args):
         if args.get('parking_location_id') is None:
             result = get_parking_location()
@@ -29,7 +31,7 @@ class ParkingLocationsAPI(MethodView):
             if not result:
                 abort(404, message=f"Parking location {args.get('parking_location_id')} not found")
             return result
-
+    @parking_locations_blueprint.response(200, ParkingLocationResponseSchema(many=True))
     def post(self):
         request_data = request.get_json()
         request_data = RequestSchema().load(request_data)
@@ -39,16 +41,22 @@ class ParkingLocationsAPI(MethodView):
         if not result:
                 abort(500, message="Parking location insert failed")
         return result
-
+    @parking_locations_blueprint.response(200, ParkingLocationResponseSchema(many=True))
     def patch(self):
         request_data = request.get_json()
+        request_data = RequestSchema().load(request_data)
         result = update_parking_location_table(data=request_data)
         if not result:
                 abort(500, message="Parking location update failed")
         return result
-
-    def delete(self, parking_id):
-        result = delete_parking_location_record(parking_id)
+    @parking_locations_blueprint.arguments(QueryParamsSchema, location='query')
+    @parking_locations_blueprint.response(200, ParkingLocationResponseSchema(many=True))
+    def delete(self, args):
+        parking_location_id = args.get('parking_location_id')
+        print(args.get('parking_location_id'))
+        if not parking_location_id:
+            abort(400, message="Invalid parking location ID")
+        result = delete_parking_location_record(parking_location_id)
         if not result:
             abort(500, message="Parking location update failed")
         return result

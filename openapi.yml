@@ -1,0 +1,101 @@
+paths:
+  /parkinglocations/:
+    get:
+      summary: Get all parking locations
+      operationId: getParkingLocations
+      responses:
+        '200':
+          description: A list of parking locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingLocation'
+  /parkinglocations/?parking_location_id=1:
+    get:
+      summary: Get a parking location by ID
+      operationId: getParkingLocationById
+      parameters:
+        - name: parking_location_id
+          in: query
+          required: true
+          description: The ID of the parking location to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A parking location object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingLocation'
+  /parkinglocations/:
+    post:
+      summary: Create a new parking location
+      operationId: createParkingLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingLocation'
+      responses:
+        '201':
+          description: The created parking location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingLocation'
+    /parkinglocations/:
+    patch:
+      summary: Update a parking location
+      operationId: updateParkingLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingLocation'
+      responses:
+        '200':
+          description: The updated parking location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingLocation'
+    /parkinglocations/?parking_location_id=1:
+    delete:
+      summary: Delete a parking location
+      operationId: deleteParkingLocation
+      parameters:
+        - name: parking_location_id
+          in: query
+          required: true
+          description: The ID of the parking location to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No content, parking location deleted successfully` 
+  
+components:
+  schemas:
+    ParkingLocation:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the parking location
+        parking_locationname:
+          type: string
+          description: The name of the parking location
+        parking_locationaddress:
+          type: string
+          description: The address of the parking location
+        parking_locationtype:
+          type: string
+          description: The type of the parking location (e.g., garage, lot, street)
+        parking_id:
+          type: integer
+          description: the parking id

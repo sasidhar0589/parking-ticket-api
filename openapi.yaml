@@ -1,0 +1,148 @@
+components:
+  responses:
+    DEFAULT_ERROR:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Default error response
+    UNPROCESSABLE_ENTITY:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unprocessable Entity
+  schemas:
+    Error:
+      properties:
+        code:
+          description: Error code
+          type: integer
+        errors:
+          additionalProperties: {}
+          description: Errors
+          type: object
+        message:
+          description: Error message
+          type: string
+        status:
+          description: Error name
+          type: string
+      type: object
+    PaginationMetadata:
+      properties:
+        first_page:
+          type: integer
+        last_page:
+          type: integer
+        next_page:
+          type: integer
+        page:
+          type: integer
+        previous_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+      type: object
+    ParkingLocationResponse:
+      properties:
+        id:
+          type: integer
+        parking_id:
+          nullable: true
+          type: integer
+        parking_locationaddress:
+          nullable: true
+          type: string
+        parking_locationname:
+          nullable: true
+          type: string
+        parking_locationtype:
+          nullable: true
+          type: string
+      type: object
+info:
+  title: Parking ticket REST API
+  version: v1
+openapi: 3.0.3
+paths:
+  /parkinglocations/:
+    delete:
+      parameters:
+      - description: Description for param1
+        in: query
+        name: parking_location_id
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ParkingLocationResponse'
+                type: array
+          description: OK
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      tags:
+      - parking_locations
+    get:
+      parameters:
+      - description: Description for param1
+        in: query
+        name: parking_location_id
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ParkingLocationResponse'
+                type: array
+          description: OK
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_ENTITY'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      tags:
+      - parking_locations
+    patch:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ParkingLocationResponse'
+                type: array
+          description: OK
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      tags:
+      - parking_locations
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ParkingLocationResponse'
+                type: array
+          description: OK
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      tags:
+      - parking_locations
+tags:
+- description: Operations on parking locations
+  name: parking_locations

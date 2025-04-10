@@ -1,14 +1,22 @@
 import sqlalchemy
+
 # from jsonschema.jsonschema import  generate_json_schema
 # from jsonschema.json_response_schema import generate_json_response_schema
-from sqlalchemy.orm import  DeclarativeBase
+from sqlalchemy.orm import  DeclarativeBase,scoped_session,sessionmaker
 import json
 class Base(DeclarativeBase):
     pass
 from sqlalchemy import create_engine, text, Column, Integer, String, Select, select, insert, update
-engine = create_engine('mysql://root:$Shani0589$@localhost/parkinglot', echo=True)
-connection = engine.connect()
+DATABASE_URI = "mysql://<usr>:<pass>@localhost/parkinglot"
+engine = create_engine(DATABASE_URI, echo=True)
+sessiondb = scoped_session(sessionmaker(autoflush= True, bind=engine))
 
+def get_db():
+    db = sessiondb()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class ParkingTable(Base):
@@ -33,40 +41,41 @@ class ParkingLocation(Base):
     parking_locationaddress = Column(String)
     parking_id = Column(Integer)
 
-def get_parking_ticket_by_id(number):
-    stmt = select(ParkingTable).where(ParkingTable.id == number)
-    result = connection.execute(stmt)
-    return result.fetchall()
-def get_praking_price(number):
-    stmt = select(ParkingTable.parking_ammount).where(ParkingTable.id == number)
-    result = connection.execute(stmt)
-    return result.fetchall()
+# def get_parking_ticket_by_id(number):
+#     stmt = select(ParkingTable).where(ParkingTable.id == number)
+#     result = connection.execute(stmt)
+#     return result.fetchall()
+# def get_praking_price(number):
+#     stmt = select(ParkingTable.parking_ammount).where(ParkingTable.id == number)
+#     result = connection.execute(stmt)
+#     return result.fetchall()
 def get_parking_location():
-     stmt = select(ParkingLocation)
-     result = connection.execute(stmt)
-     return generate_json_response(ParkingLocation, result)     
+    db = next(get_db())
+    result = db.query(ParkingLocation).all()
+    return result
 def get_parking_location_by_id(number):
-    stmt = select(ParkingLocation).where(ParkingLocation.id == number)
-    result = connection.execute(stmt)
-    result = generate_json_response(ParkingLocation, result)
+    db = next(get_db())
+    result = db.query(ParkingLocation).where(ParkingLocation.id == number).all()
     return result
 def insert_parking_location(data): 
-    stmt = insert(ParkingLocation).values(id = data['id'],parking_locationname=data['parking_locationname'], parking_locationtype=data['parking_locationtype'], parking_locationaddress=data['parking_locationaddress'], parking_id=data['parking_id'])
-    connection.execute(stmt)
-    connection.commit()
+    db = next(get_db())
+    new_parking_location = ParkingLocation(**data)
+    db.add(new_parking_location)
+    db.flush()
+    db.commit()
     return get_parking_location()
 def update_parking_location_table(data):
-    stmt = update(ParkingLocation).where(ParkingLocation.id == data['id']).values(parking_locationname=data['parking_locationname'], parking_locationtype=data['parking_locationtype'], parking_locationaddress=data['parking_locationaddress'], parking_id=data['parking_id'])
-    connection.execute(stmt)
-    connection.commit()
+    db = next(get_db())
+    db.query(ParkingLocation).filter(ParkingLocation.id == data['id']).update({
+        ParkingLocation.parking_locationname: data['parking_locationname'],
+        ParkingLocation.parking_locationtype: data['parking_locationtype'],
+        ParkingLocation.parking_locationaddress: data['parking_locationaddress'],
+        ParkingLocation.parking_id: data['parking_id']
+    })
+    db.commit()
     return get_parking_location()
 def delete_parking_location_record(number):
-    stmt = ParkingLocation.__table__.delete().where(ParkingLocation.id == number)
-    connection.execute(stmt)
-    connection.commit()
+    db = next(get_db())
+    db.query(ParkingLocation).filter(ParkingLocation.id == number).delete()
+    db.commit()
     return get_parking_location()
-def generate_json_response(model, result):
-    response = []
-    for row in result:
-        response.append({column.name: getattr(row, column.name) for column in model.__table__.columns})
-    return json.dumps(response, indent=4)
