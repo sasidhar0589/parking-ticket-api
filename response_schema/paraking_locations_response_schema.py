@@ -7,3 +7,6 @@ class ParkingLocationResponseSchema(SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
         # exclude = ('id',)
+        
+        
+    
